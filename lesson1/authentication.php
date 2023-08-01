@@ -1,6 +1,55 @@
 <?php
 include("../database/connection.php");
 
+use PHPMailer\PHPMailer\PHPMailer;
+
+include_once $_SERVER['DOCUMENT_ROOT'] . '/utilities/PHPMailer-master/src/PHPMailer.php';
+include_once $_SERVER['DOCUMENT_ROOT'] . '/utilities/PHPMailer-master/src/SMTP.php';
+include_once $_SERVER['DOCUMENT_ROOT'] . '/utilities/PHPMailer-master/src/Exception.php';
+if (isset($_POST['submit'])) {
+    try {
+        $email = $_POST['email'];
+        $result = $dbConn->query("SELECT id from users where email = '$email'");
+        $user = $result->fetch(PDO::FETCH_ASSOC);
+        if (!$user) {
+            echo "<script>alert('Email not found');</script>";
+        }
+        // tao token
+        $token = md5(time() . $email);
+        //luu token vao database
+        $dbConn->query("INSERT into verify_account(email,token) values('$email','$token')");
+
+
+
+        $link = "<a href='http://127.0.0.1:3456/verify.php?email="
+            . $email . "&token=" . $token . "'>Click to verify your account!</a>";
+        $mail = new PHPMailer();
+        $mail->CharSet = "utf-8";
+        $mail->isSMTP();
+        $mail->SMTPAuth = true;
+        $mail->Username = "duyvo761";
+        $mail->Password = "ghqzxnebbambdjtk";
+        $mail->SMTPSecure = "ssl";
+        $mail->Host = "ssl://smtp.gmail.com";
+        $mail->Port = "465";
+        $mail->From = "duyvo761@gmail.com";
+        $mail->FromName = "duyrk";
+        $mail->addAddress($email, 'Hello');
+        $mail->Subject = "Verify your account";
+        $mail->isHTML(true);
+        $mail->Body = "Click on this link to verify your account " . $link . " ";
+        $res = $mail->Send();
+
+        if ($res) {
+            echo "<script> alert('Vui lòng kiểm tra email của bạn!') </script>";
+        } else {
+            header("Location: 404.php");
+        }
+    } catch (Exception $e) {
+        header("Location: 404.php");
+    }
+}
+
 ?>
 
 
@@ -34,7 +83,7 @@ include("../database/connection.php");
                     <div class="card col-lg-4 mx-auto">
                         <div class="card-body px-5 py-5">
                             <h3 class="card-title text-left mb-3">Verify your account</h3>
-                            <form method="post" action="reset_password.php">
+                            <form method="post" action="authentication.php">
 
                                 <div class="form-group">
                                     <label for="password">Email *</label>

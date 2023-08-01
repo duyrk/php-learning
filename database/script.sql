@@ -8,9 +8,8 @@ create table
         email VARCHAR(100) NOT null UNIQUE,
         password TEXT NOT NULL,
         name TEXT NOT NULL,
-        isVerify BIT DEFAULT 0;
-
-);
+        isVerify BIT DEFAULT 0
+    );
 
 insert into
     users (id, email, password, name)
@@ -59,6 +58,15 @@ values (
 
 CREATE Table
     reset_password (
+        id INT PRIMARY KEY AUTO_INCREMENT,
+        token VARCHAR(50) NOT null,
+        email VARCHAR(100) NOT null,
+        createdAt DATETIME NOT NULL DEFAULT NOW(),
+        available BIT DEFAULT 1
+    );
+
+CREATE Table
+    verify_account (
         id INT PRIMARY KEY AUTO_INCREMENT,
         token VARCHAR(50) NOT null,
         email VARCHAR(100) NOT null,
